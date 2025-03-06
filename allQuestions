@@ -1,0 +1,148 @@
+#include <bits/stdc++.h>
+using namespace std;
+double f(double x)
+{
+    return x * x * x - x - 2;
+}
+double diff_f(double x)
+{
+    return 3*x*x-1;
+}
+void bisection_method(double a, double b, double tol)
+{
+    int iter=0;
+    double c;
+    if(f(a)* f(b) >=0) {cout<<"Invalid a and b";return;}
+    while((b-a)/2.0 > tol)
+    {
+        c=(a+b)/2.0;
+        cout<<"Iteration: "<< iter++ <<' '<< c <<endl;
+        if(f(c)==0.0) break;
+        if( f(a)*f(c) < 0 ) b=c;
+        else a=c;
+    }
+    cout<<"Root using bisection method is: "<<c<<endl;
+}
+void regula_falsi(double a, double b, double tol)
+{
+    int iter=0;
+    double c=0;
+    while(fabs(f(c))>tol)
+    {
+        c=(a*f(b) - b*f(a)) / (f(b)-f(a)) ;
+        cout<<"Iteration: "<<iter++<<' '<< c <<endl;
+        if(f(a)*f(c) < 0) b=c;
+        else a=c;
+    }
+    cout<<"Root using regula falsi is: "<<c<<endl;
+}
+void newton_ralphson(double a, double b, double tol)
+{
+    int iter=0;
+    double c=(a+b)/2.0;
+    while(fabs(f(c)) > tol)
+    {
+        cout<<"Iteration: "<<iter++ <<' '<< c <<endl;
+        c=c-(f(c))/(diff_f(c));
+    }
+    cout<<"Root using newton_ralphson is: "<< c << endl;
+}
+void secant_method(double a, double b, double tol)
+{
+    int iter=0;
+    double c=0.0;
+    while(fabs(f(c)) > tol)
+    {
+        c= (a*f(b)-b*f(a))/(f(b)-f(a));
+        cout<<"Iteration: "<<iter++ <<' '<< c <<endl;
+        a=b;
+        b=c;
+    }
+    cout<<"Root using secant_method is: "<< c<< endl;
+}
+void printArr(vector<double>& x)
+{
+    cout << "Solution:\n";
+    for (int i = 0; i < x.size(); i++)
+        cout << "x" << i + 1 << " = " << x[i] << endl;
+    
+}
+void gauss_elimination(vector<vector<double>> &a, vector<double>& x, int n)
+{
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            double ratio = a[j][i] / a[i][i];
+            for (int k = 0; k <= n; k++)
+                a[j][k] -= ratio * a[i][k];
+        }
+    }
+
+    for (int i = n - 1; i >= 0; i--) {
+        x[i] = a[i][n];
+        for (int j = i + 1; j < n; j++)
+            x[i] -= a[i][j] * x[j];
+        x[i] /= a[i][i];
+    }
+    printArr(x);
+}
+void jacobi_method(vector<vector<double>> &A, vector<double> &b, int n, double tol, int maxIter) {
+    vector<double> x_old(n, 0.0);
+    vector<double> x(n,0.0); 
+    for (int iter = 0; iter < maxIter; iter++) {
+        for (int i = 0; i < n; i++) {
+            double sum = b[i];
+            for (int j = 0; j < n; j++) {
+                if (i != j)
+                    sum -= A[i][j] * x_old[j];
+            }
+            x[i] = sum / A[i][i];
+        }
+
+        // Check for convergence
+        double error = 0.0;
+        for (int i = 0; i < n; i++)
+            error += fabs(x[i] - x_old[i]);
+
+        if (error < tol) break;
+        x_old = x;
+    }
+    printArr(x);
+}
+void gauss_seidel(vector<vector<double>> &A, vector<double> &b, int n, double tol, int maxIter) {
+    vector<double> x(n,0.0);
+    for (int iter = 0; iter < maxIter; iter++) {
+        double error = 0.0;
+        
+        for (int i = 0; i < n; i++) {
+            double sum = b[i];
+            for (int j = 0; j < n; j++) {
+                if (i != j)
+                    sum -= A[i][j] * x[j];
+            }
+            double new_x = sum / A[i][i];
+            error += fabs(new_x - x[i]);
+            x[i] = new_x;
+        }
+
+        if (error < tol) break; // Convergence check
+    }
+    printArr(x);
+}
+int main()
+{
+    double a, b, tol=1e-4;
+    cin>>a>>b;
+    bisection_method(a,b,tol);
+    regula_falsi(a,b,tol);
+    newton_ralphson(a,b,tol);
+    secant_method(a,b,tol);
+    vector<vector<double>> A1={{8, -3, 2, 20}, {4, 11, -1, 33}, {6, 3, 12, 35}};
+    vector<double> X1;
+    gauss_elimination(A1,X1,3);
+    vector<vector<double>> A2={{8, -3, 2, 20}, {4, 11, -1, 33}, {6, 3, 12, 35}};
+    vector<double> X2;
+    jacobi_method(A2,X2,3,tol,100);
+    vector<vector<double>> A3={{8, -3, 2, 20}, {4, 11, -1, 33}, {6, 3, 12, 35}};
+    vector<double> X3;
+    gauss_seidel(A3,X3,3,tol,100);
+}
